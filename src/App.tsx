@@ -54,8 +54,10 @@ export default function App() {
   // @ts-ignore
   const [isPending, startTransition] = React.useTransition();
 
-  const [queryString, setQueryString] = React.useState('');
-  const [query, setQuery] = React.useState('');
+  const [queryString, setQueryString] = React.useState(
+    new URL(window.location.href).searchParams.get('q') ?? '',
+  );
+  const [query, setQuery] = React.useState(queryString);
 
   const queryTokens = React.useMemo(
     () =>
@@ -112,7 +114,13 @@ export default function App() {
             style={{ width: '100%' }}
             value={queryString}
             onChange={(value) => {
+              // update the URL
+              const url = new URL(window.location.href);
+              url.searchParams.set('q', value);
+              window.history.replaceState({}, '', url.toString());
+              // update the search input
               setQueryString(value);
+              // update the rest of the view (e.g. list)
               startTransition(() => {
                 setQuery(value);
               });
