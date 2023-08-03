@@ -1,2 +1,1 @@
-# remnant2browser
-Created with CodeSandbox
+# Remnant II Browser
