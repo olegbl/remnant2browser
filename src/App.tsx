@@ -114,7 +114,7 @@ export default function App() {
             options={suggestions}
             style={{ width: '100%' }}
             value={queryString}
-            onChange={(value) => {
+            onChange={(value: string): void => {
               // update the URL
               const url = new URL(window.location.href);
               url.searchParams.set('q', value);
@@ -127,7 +127,10 @@ export default function App() {
               });
             }}>
             <antd.Input
-              addonBefore={<icons.SearchOutlined />}
+              addonBefore={
+                // @ts-ignore
+                <icons.SearchOutlined />
+              }
               addonAfter={
                 isPending ? 'Loading...' : `${filteredEntities.length} Results`
               }
