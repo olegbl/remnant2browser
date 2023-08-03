@@ -22,10 +22,11 @@ const List = React.memo(function List({ entities }: { entities: Entity[] }) {
   return (
     <>
       {entities.map((entity) => (
-        <antd.Typography.Link
+        <a
           key={entity.name}
           href={getURL(entity.name)}
-          target="_blank">
+          target="_blank"
+          rel="noreferrer">
           <antd.Card hoverable={true} size="small" style={{ marginTop: 12 }}>
             <antd.Space>
               <antd.Avatar size={48} src={entity.iconURL} />
@@ -44,7 +45,7 @@ const List = React.memo(function List({ entities }: { entities: Entity[] }) {
               </antd.Space>
             </antd.Space>
           </antd.Card>
-        </antd.Typography.Link>
+        </a>
       ))}
     </>
   );
