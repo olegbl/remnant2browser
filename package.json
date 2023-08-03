@@ -25,7 +25,7 @@
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
     "predeploy": "npm run build",
-    "deploy": "gh-pages --dist docs --dest docs --no-push"
+    "deploy": "gh-pages --dist build"
   },
   "browserslist": [
     ">0.2%",
