@@ -2,7 +2,7 @@ import './styles.css';
 import * as React from 'react';
 import * as antd from 'antd';
 import * as icons from '@ant-design/icons';
-import {Entity} from './Types';
+import { Entity } from './Types';
 import data from './data';
 
 const tags: Set<string> = new Set(
@@ -52,7 +52,7 @@ const List = React.memo(function List({ entities }: { entities: Entity[] }) {
   );
 });
 
-export default function App() {
+function Content() {
   // @ts-ignore
   const [isPending, startTransition] = React.useTransition();
 
@@ -146,5 +146,19 @@ export default function App() {
         </antd.Layout.Content>
       </antd.Layout>
     </React.Suspense>
+  );
+}
+
+export default function App() {
+  return (
+    <antd.ConfigProvider
+      theme={{
+        // match app theme to OS theme
+        algorithm: window.matchMedia('(prefers-color-scheme: dark)').matches
+          ? antd.theme.darkAlgorithm
+          : antd.theme.defaultAlgorithm,
+      }}>
+      <Content />
+    </antd.ConfigProvider>
   );
 }
