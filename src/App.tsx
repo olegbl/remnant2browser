@@ -1,8 +1,9 @@
+import './styles.css';
 import * as React from 'react';
 import * as antd from 'antd';
 import * as icons from '@ant-design/icons';
-import './styles.css';
-import data, { Entity } from './data';
+import {Entity} from './Types';
+import data from './data';
 
 const tags: Set<string> = new Set(
   data.reduce(

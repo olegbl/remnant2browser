@@ -7,7 +7,6 @@ https://olegbl.github.io/remnant2browser/
 ## Editing
 
 https://codesandbox.io/s/github/olegbl/remnant2browser
-https://codesandbox.io/s/remnant-ii-browser-6rxx8d
 
 ## Publishing
 
