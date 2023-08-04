@@ -19,6 +19,12 @@ body,
   grid-template-columns: repeat(auto-fill, minmax(512px, 1fr));
 }
 
+@media (max-width: 768px) {
+  .list {
+    grid-template-columns: repeat(1, 1fr);
+  }
+}
+
 .card {
   height: 100%;
 }
