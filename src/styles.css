@@ -11,3 +11,40 @@ body,
 .app {
   padding: 12px;
 }
+
+.list {
+  align-items: stretch;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(512px, 1fr));
+}
+
+.card {
+  height: 100%;
+}
+
+.card-content {
+  display: flex;
+  align-items: row;
+  gap: 16px;
+}
+
+.card-avatar {
+  flex: 0 0 auto;
+}
+
+.card-info {
+  flex: 1 1 auto;
+}
+
+.card-name {
+  font-weight: bold;
+}
+
+.card-tags {
+  gap: 4px;
+}
+
+.card-tag {
+  margin: 0;
+}

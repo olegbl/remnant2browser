@@ -4,6 +4,7 @@ import * as antd from 'antd';
 import * as icons from '@ant-design/icons';
 import { Entity } from './Types';
 import data from './data';
+import { TaobaoSquareFilled } from '@ant-design/icons';
 
 const tags: Set<string> = new Set(
   data.reduce(
@@ -21,34 +22,39 @@ function getURL(name: string): string {
 
 const List = React.memo(function List({ entities }: { entities: Entity[] }) {
   return (
-    <>
+    <div className="list">
       {entities.map((entity) => (
         <a
           key={entity.name}
+          className="list-item"
           href={getURL(entity.name)}
           target="_blank"
           rel="noreferrer">
-          <antd.Card hoverable={true} size="small" style={{ marginTop: 12 }}>
-            <antd.Space>
-              <antd.Avatar size={48} src={entity.iconURL} />
-              <antd.Space direction="vertical" style={{ marginLeft: 12 }}>
-                <antd.Typography style={{ fontWeight: 'bold' }}>
+          <antd.Card className="card" hoverable={true} size="small">
+            <div className="card-content">
+              <antd.Avatar
+                className="card-avatar"
+                size={48}
+                src={entity.iconURL}
+              />
+              <antd.Space className="card-info" direction="vertical">
+                <antd.Typography className="card-name">
                   {entity.name}
                 </antd.Typography>
                 <antd.Typography>{entity.description}</antd.Typography>
-                <antd.Space>
+                <antd.Space className="card-tags" wrap>
                   {entity.tags.map((tag) => (
-                    <antd.Tag key={tag} color="processing">
+                    <antd.Tag key={tag} className="card-tag" color="processing">
                       {tag}
                     </antd.Tag>
                   ))}
                 </antd.Space>
               </antd.Space>
-            </antd.Space>
+            </div>
           </antd.Card>
         </a>
       ))}
-    </>
+    </div>
   );
 });
 
@@ -113,7 +119,7 @@ function Content() {
         <antd.Layout.Content style={{ padding: 12 }}>
           <antd.AutoComplete
             options={suggestions}
-            style={{ width: '100%' }}
+            style={{ width: '100%', marginBottom: 12 }}
             value={queryString}
             onChange={(value: string): void => {
               // update the URL
