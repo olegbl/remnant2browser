@@ -1,4 +1,5 @@
 const fs = require('fs');
+const vm = require('vm');
 const puppeteer = require('puppeteer-extra');
 const stealthPlugin = require('puppeteer-extra-plugin-stealth');
 const { JSDOM } = require('jsdom');
@@ -11,7 +12,7 @@ puppeteer.use(stealthPlugin());
 const USER_AGENT =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36';
 
-async function downloadPage(browserPage, pages) {
+async function downloadPage(browserPage, page) {
   try {
     console.log(`downloading page ${page.url}`);
     await browserPage.goto(page.url, { waitUntil: 'domcontentloaded' });
@@ -29,10 +30,6 @@ async function downloadPage(browserPage, pages) {
 
 function getUnique(arr) {
   return Array.from(new Set(arr.filter(Boolean))).sort();
-}
-
-function getID(name) {
-  return name.toLowerCase();
 }
 
 function getCellText(tr, cellIndex) {
@@ -70,19 +67,28 @@ async function getImgURL(browserPage, tr) {
 
 const KEYWORDS = [
   // locations
-  'Labyrinth',
-  'Losomn',
-  'Root Earth',
-  'Ward 13',
-  'Yaesha',
-  "N'Erud",
+  ['Labyrinth'],
+  ['Losomn'],
+  ['Root Earth'],
+  ['Ward 13'],
+  ['Yaesha'],
+  ["N'Erud"],
   // NPCs
-  'Cass',
-  'Drzyr Replicator',
-  'Mudtooth',
-  'Nimue',
-  'Reggie',
-  "Nightweaver's Web.",
+  ['Cass'],
+  ['Drzyr Replicator'],
+  ['Mudtooth'],
+  ['Nimue'],
+  ['Reggie'],
+  ["Nightweaver's Web."],
+  // mechanics
+  ['Experience'],
+  ['Health'],
+  ['HP', 'Health'],
+  ['Lifesteal'],
+  ['Stamina'],
+  ['Incoming Damage', 'DR'],
+  ['Incoming Enemy Damage', 'DR'],
+  ['Bulwark', 'DR'],
 ];
 
 function getKeywords(text) {
@@ -90,12 +96,12 @@ function getKeywords(text) {
     console.warn('got empty text when trying to parse keywords');
     return [];
   }
-  return KEYWORDS.filter((keyword) =>
-    text.toLowerCase().includes(keyword.toLowerCase()),
-  );
+  return KEYWORDS.filter(([value, tag]) =>
+    text.toLowerCase().includes(value.toLowerCase()),
+  ).map(([value, tag]) => tag ?? value);
 }
 
-async function parsePage(browserPage, page) {
+async function parsePage(browserPage, page, oldEntities) {
   console.log(`parsing page ${page.url}`);
 
   // grab and parse the page
@@ -109,7 +115,7 @@ async function parsePage(browserPage, page) {
 
   // parse each table row
   const entities = [];
-  for (tr of trs) {
+  for (let tr of trs) {
     if (tr != null) {
       const a = tr.querySelector('.wiki_link');
       if (a != null) {
@@ -118,7 +124,8 @@ async function parsePage(browserPage, page) {
         entities.push({
           name,
           description: page.getDescription?.(tr) ?? '',
-          iconURL: await getImgURL(browserPage, tr),
+          iconURL:
+            oldEntities[name]?.iconURL ?? (await getImgURL(browserPage, tr)),
           linkURL: fixWikiURL(a.href),
           tags: getUnique(page.getTags?.(tr) ?? []),
         });
@@ -133,6 +140,22 @@ async function writeFile(filename, content) {
 }
 
 async function scrapeData(pages) {
+  const oldDataTs = fs.readFileSync('./src/data.tsx', {
+    encoding: 'utf8',
+  });
+  const oldDataJs = oldDataTs
+    .replace(/\n/gm, '')
+    .replace(/^.*const data: Entity\[\] = /, 'var data = ')
+    .replace(/export default data;/, 'module.exports = data;')
+    .trim();
+  const context = { module: { exports: {} } };
+  vm.runInNewContext(oldDataJs, context);
+  const oldData = context.module.exports;
+  const oldEntities = oldData.reduce(
+    (agg, entity) => ({ ...agg, [entity.name]: entity }),
+    {},
+  );
+
   // using headless doesna't work, thanks CloudFlare
   // const browser = await puppeteer.launch({ headless: false });
   // instead, run Chrome with --remote-debugging-port=9222
@@ -146,13 +169,13 @@ async function scrapeData(pages) {
   await browserPage.setViewport({ width: 1366, height: 768 });
 
   const downloadedPages = [];
-  for (page of pages) {
+  for (let page of pages) {
     downloadedPages.push(await downloadPage(browserPage, page));
   }
 
   const parsedPages = [];
-  for (page of downloadedPages) {
-    parsedPages.push(await parsePage(browserPage, page));
+  for (let page of downloadedPages) {
+    parsedPages.push(await parsePage(browserPage, page, oldEntities));
   }
 
   const entities = parsedPages
@@ -175,17 +198,29 @@ scrapeData([
   {
     url: 'https://remnant2.wiki.fextralife.com/Amulets',
     getDescription: (tr) => getCellText(tr, 2),
-    getTags: (tr) => ['Amulet', ...getKeywords(getCellText(tr, 3))],
+    getTags: (tr) => [
+      'Amulet',
+      ...getKeywords(getCellText(tr, 2)),
+      ...getKeywords(getCellText(tr, 3)),
+    ],
   },
   {
     url: 'https://remnant2.wiki.fextralife.com/Rings',
     getDescription: (tr) => getCellText(tr, 2),
-    getTags: (tr) => ['Ring', ...getKeywords(getCellText(tr, 3))],
+    getTags: (tr) => [
+      'Ring',
+      ...getKeywords(getCellText(tr, 2)),
+      ...getKeywords(getCellText(tr, 3)),
+    ],
   },
   {
     url: 'https://remnant2.wiki.fextralife.com/Relics',
     getDescription: (tr) => getCellText(tr, 2),
-    getTags: (tr) => ['Relic', ...getKeywords(getCellText(tr, 3))],
+    getTags: (tr) => [
+      'Relic',
+      ...getKeywords(getCellText(tr, 2)),
+      ...getKeywords(getCellText(tr, 3)),
+    ],
   },
   {
     url: 'https://remnant2.wiki.fextralife.com/Mutators',
@@ -208,7 +243,12 @@ scrapeData([
   },
   {
     url: 'https://remnant2.wiki.fextralife.com/Traits',
-    getDescription: (tr) => getCellText(tr, 4),
-    getTags: (tr) => ['Trait'],
+    getDescription: (tr) => getCellText(tr, 4) + ' (at Max Level)',
+    getTags: (tr) => ['Trait', ...getKeywords(getCellText(tr, 4))],
+  },
+  {
+    url: 'https://remnant2.wiki.fextralife.com/Weapon+Mods',
+    getDescription: (tr) => getCellText(tr, 2),
+    getTags: (tr) => ['Mod', ...getKeywords(getCellText(tr, 2))],
   },
 ]);
