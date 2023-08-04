@@ -4,7 +4,7 @@
   "description": "Browser for items, trait, perks, etc... for Remnant II.",
   "lang": "en-US",
   "start_url": "/",
-  "scope": "/",
+  "scope": "/remnant2browser/",
   "display": "standalone",
   "orientation": "any",
   "theme_color": "#000000",
