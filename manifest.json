@@ -1,8 +1,11 @@
 {
   "name": "Remnant II: Browser",
   "short_name": "Remnant2Browser",
+  "lang": "en-US",
   "start_url": ".",
   "display": "standalone",
+  "orientation": "any",
+  "background_color": "#000000",
   "icons": [
     {
       "src": "logo.png",
