@@ -1,0 +1,13 @@
+{
+  "name": "Remnant II: Browser",
+  "short_name": "Remnant2Browser",
+  "start_url": ".",
+  "display": "standalone",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "64x64",
+      "type": "image/png"
+    }
+  ]
+}
